@@ -79,6 +79,23 @@ export default function App(){
     return ()=>window.clearInterval(timer);
   },[]);
 
+  useEffect(()=>{
+    const viewport=window.visualViewport;
+    const syncViewportHeight=()=>{
+      const height=Math.round(viewport?.height??window.innerHeight);
+      document.documentElement.style.setProperty('--app-height',`${height}px`);
+    };
+    syncViewportHeight();
+    window.addEventListener('resize',syncViewportHeight);
+    viewport?.addEventListener('resize',syncViewportHeight);
+    viewport?.addEventListener('scroll',syncViewportHeight);
+    return ()=>{
+      window.removeEventListener('resize',syncViewportHeight);
+      viewport?.removeEventListener('resize',syncViewportHeight);
+      viewport?.removeEventListener('scroll',syncViewportHeight);
+    };
+  },[]);
+
   const validRecords=useMemo(()=>records.filter(record=>record.date<=todayKey),[records]);
   const calculatedHabits=useMemo(()=>habits.map(habit=>{
     const completedDates=new Set(validRecords.filter(record=>record.completedHabitIds.includes(habit.id)).map(record=>record.date));
